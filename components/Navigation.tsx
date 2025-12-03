@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HeartPulse, CalendarClock, BookOpenText, Settings, X, Home } from 'lucide-react';
+import { HeartPulse, BookOpenText, Settings, X, Home } from 'lucide-react';
 import { Page } from '../types';
 
 interface NavigationProps {
@@ -13,7 +13,6 @@ export const Navigation: React.FC<NavigationProps> = ({ isOpen, onClose, onNavig
   const menuItems = [
     { icon: <Home size={22} />, label: 'Home', id: Page.HOME },
     { icon: <HeartPulse size={22} />, label: 'Emotional Fluctuations', id: Page.EMOTIONAL_FLUCTUATIONS },
-    { icon: <CalendarClock size={22} />, label: 'Timeline (Year /Month)', id: Page.TIMELINE },
     { icon: <BookOpenText size={22} />, label: 'Relationship Ledger', id: Page.RELATIONSHIP_LEDGER },
     { icon: <Settings size={22} />, label: 'Settings', id: Page.SETTINGS },
   ];
