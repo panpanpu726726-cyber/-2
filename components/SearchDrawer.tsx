@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, Search, Calendar, Users, Gift, Tag, RotateCcw, Check } from 'lucide-react';
 import { FilterState } from '../types';
@@ -143,25 +142,28 @@ export const SearchDrawer: React.FC<SearchDrawerProps> = ({ isOpen, onClose, onA
         onClick={onClose}
       />
       
-      {/* Drawer */}
-      <div className={`fixed top-0 right-0 h-full w-[400px] bg-gray-900/90 backdrop-blur-xl z-[70] shadow-2xl transform transition-transform duration-300 ease-out border-l border-white/10 flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      {/* Drawer - Matching Navigation Style (#cf1515) */}
+      <div className={`fixed top-0 right-0 h-full w-[400px] bg-[#cf1515] z-[70] shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-transform duration-500 cubic-bezier(0.25, 1, 0.5, 1) border-l border-[#ff5e57] flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
-        {/* Header */}
-        <div className="p-6 border-b border-white/10 flex justify-between items-center shrink-0 bg-[#8B0000]/50">
-           <h2 className="text-xl font-serif font-bold text-white tracking-widest flex items-center gap-2">
+        {/* Header - Lighter Red */}
+        <div className="p-6 bg-[#ff5e57] flex justify-between items-center shrink-0 shadow-sm relative z-20">
+           <h2 className="text-xl font-serif font-bold text-gold-coin tracking-widest flex items-center gap-2 drop-shadow-md">
              <Search size={22} className="text-gold-coin" /> Quick Search
            </h2>
-           <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">
+           <button onClick={onClose} className="text-white/80 hover:text-white transition-colors hover:rotate-90 duration-300">
              <X size={26} />
            </button>
+           
+           {/* Decorative Curve at bottom of header */}
+           <div className="absolute -bottom-3 left-0 w-full h-3 bg-[#ff5e57] rounded-b-[50%] z-10"></div>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 pt-8">
           
           {/* 1. Keyword Search */}
-          <div className="space-y-3">
-             <label className="text-xs font-bold text-gold-accent uppercase tracking-wider flex items-center gap-2">
+          <div className="bg-black/10 rounded-xl p-4 border border-white/10 space-y-3 shadow-inner backdrop-blur-sm">
+             <label className="text-xs font-bold text-[#FFD700] uppercase tracking-wider flex items-center gap-2">
                 <Tag size={14} /> Keywords
              </label>
              <div className="relative">
@@ -170,15 +172,15 @@ export const SearchDrawer: React.FC<SearchDrawerProps> = ({ isOpen, onClose, onA
                   value={localFilters.query}
                   onChange={(e) => setLocalFilters(prev => ({ ...prev, query: e.target.value }))}
                   placeholder="Event name, person..."
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-3 pl-10 pr-4 text-white placeholder-white/30 focus:outline-none focus:border-gold-coin focus:ring-1 focus:ring-gold-coin transition-all font-serif"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-3 pl-10 pr-4 text-white placeholder-white/50 focus:outline-none focus:border-gold-coin focus:ring-1 focus:ring-gold-coin transition-all font-serif shadow-sm font-medium"
                 />
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" />
              </div>
           </div>
 
           {/* 2. Occasion (Categories) */}
-          <div className="space-y-3">
-             <label className="text-xs font-bold text-gold-accent uppercase tracking-wider flex items-center gap-2">
+          <div className="bg-black/10 rounded-xl p-4 border border-white/10 space-y-3 shadow-inner backdrop-blur-sm">
+             <label className="text-xs font-bold text-[#FFD700] uppercase tracking-wider flex items-center gap-2">
                 <Gift size={14} /> Occasion
              </label>
              <div className="grid grid-cols-2 gap-2">
@@ -190,8 +192,8 @@ export const SearchDrawer: React.FC<SearchDrawerProps> = ({ isOpen, onClose, onA
                       onClick={() => toggleOccasion(occ)}
                       className={`py-2 px-3 rounded text-sm font-medium transition-all text-left flex justify-between items-center ${
                         isActive 
-                          ? 'bg-gold-coin text-[#8B0000] shadow-[0_0_10px_rgba(255,215,0,0.3)]' 
-                          : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                          ? 'bg-gold-coin text-[#8B0000] shadow-md font-bold' 
+                          : 'bg-white/10 text-white hover:bg-white/20 border border-white/10'
                       }`}
                     >
                       {occ}
@@ -202,40 +204,39 @@ export const SearchDrawer: React.FC<SearchDrawerProps> = ({ isOpen, onClose, onA
              </div>
           </div>
 
-          {/* 3. Date Selection (Custom English Dropdowns) */}
-          <div className="space-y-3">
-             <label className="text-xs font-bold text-gold-accent uppercase tracking-wider flex items-center gap-2">
+          {/* 3. Date Selection */}
+          <div className="bg-black/10 rounded-xl p-4 border border-white/10 space-y-3 shadow-inner backdrop-blur-sm">
+             <label className="text-xs font-bold text-[#FFD700] uppercase tracking-wider flex items-center gap-2">
                 <Calendar size={14} /> Date
              </label>
              <div className="flex gap-4">
                 <select 
                    value={selectedYear} 
                    onChange={(e) => handleDateChange('year', e.target.value)}
-                   className="flex-1 bg-white/10 border border-white/20 rounded-lg py-3 px-3 text-white focus:outline-none focus:border-gold-coin font-mono cursor-pointer appearance-none"
+                   className="flex-1 bg-white/10 border border-white/20 rounded-lg py-3 px-3 text-white focus:outline-none focus:border-gold-coin font-mono cursor-pointer appearance-none hover:bg-white/20 transition-colors shadow-sm font-medium"
                 >
-                   <option value="" className="bg-gray-800 text-gray-400">Year</option>
+                   <option value="" className="bg-[#b91c1c] text-white">Year</option>
                    {years.map(y => (
-                       <option key={y} value={y} className="bg-gray-800">{y}</option>
+                       <option key={y} value={y} className="bg-[#b91c1c] text-white">{y}</option>
                    ))}
                 </select>
 
                 <select 
                    value={selectedMonth} 
                    onChange={(e) => handleDateChange('month', e.target.value)}
-                   className="flex-1 bg-white/10 border border-white/20 rounded-lg py-3 px-3 text-white focus:outline-none focus:border-gold-coin font-mono cursor-pointer appearance-none"
+                   className="flex-1 bg-white/10 border border-white/20 rounded-lg py-3 px-3 text-white focus:outline-none focus:border-gold-coin font-mono cursor-pointer appearance-none hover:bg-white/20 transition-colors shadow-sm font-medium"
                 >
-                   <option value="" className="bg-gray-800 text-gray-400">Month</option>
+                   <option value="" className="bg-[#b91c1c] text-white">Month</option>
                    {months.map(m => (
-                       <option key={m.val} value={m.val} className="bg-gray-800">{m.label}</option>
+                       <option key={m.val} value={m.val} className="bg-[#b91c1c] text-white">{m.label}</option>
                    ))}
                 </select>
              </div>
-             <p className="text-[10px] text-gray-400">Filter timeline by Year and Month.</p>
           </div>
 
           {/* 4. Relation Type */}
-          <div className="space-y-3">
-             <label className="text-xs font-bold text-gold-accent uppercase tracking-wider flex items-center gap-2">
+          <div className="bg-black/10 rounded-xl p-4 border border-white/10 space-y-3 shadow-inner backdrop-blur-sm">
+             <label className="text-xs font-bold text-[#FFD700] uppercase tracking-wider flex items-center gap-2">
                 <Users size={14} /> Relation Type
              </label>
              <div className="flex flex-wrap gap-2">
@@ -247,8 +248,8 @@ export const SearchDrawer: React.FC<SearchDrawerProps> = ({ isOpen, onClose, onA
                        onClick={() => toggleRelation(cat)}
                        className={`py-1.5 px-3 rounded-full text-xs font-bold border transition-all ${
                          isActive 
-                           ? 'bg-[#d11515] border-[#d11515] text-white shadow-md' 
-                           : 'bg-transparent border-white/20 text-gray-300 hover:border-white/50'
+                           ? 'bg-[#b91c1c] border-[#ff5e57] text-white shadow-md' 
+                           : 'bg-transparent border-white/30 text-white hover:border-white/60 hover:bg-white/10'
                        }`}
                      >
                        {cat}
@@ -258,24 +259,24 @@ export const SearchDrawer: React.FC<SearchDrawerProps> = ({ isOpen, onClose, onA
              </div>
           </div>
 
-           {/* 5. Gift Amount (Dual Range Slider) */}
-           <div className="space-y-6">
+           {/* 5. Gift Amount */}
+           <div className="bg-black/10 rounded-xl p-4 border border-white/10 space-y-6 shadow-inner backdrop-blur-sm">
              <div className="flex justify-between items-end">
-                <label className="text-xs font-bold text-gold-accent uppercase tracking-wider flex items-center gap-2">
+                <label className="text-xs font-bold text-[#FFD700] uppercase tracking-wider flex items-center gap-2">
                     Gift Amount
                 </label>
-                <span className="text-gold-coin font-mono font-bold text-sm">
+                <span className="text-white font-mono font-bold text-sm bg-black/20 px-2 py-0.5 rounded">
                     ¥{minVal} - ¥{maxVal}{maxVal === 10000 ? '+' : ''}
                 </span>
              </div>
              
              <div className="relative w-full h-8 flex items-center">
                  {/* Track Background */}
-                 <div className="absolute w-full h-1.5 bg-white/20 rounded-full z-0"></div>
+                 <div className="absolute w-full h-1.5 bg-black/30 rounded-full z-0"></div>
                  
                  {/* Active Track Range */}
                  <div 
-                    className="absolute h-1.5 bg-gold-coin rounded-full z-0 opacity-80"
+                    className="absolute h-1.5 bg-gold-coin rounded-full z-0 opacity-100 shadow-[0_0_10px_rgba(255,215,0,0.5)]"
                     style={{
                         left: `${getPercent(minVal)}%`,
                         width: `${getPercent(maxVal) - getPercent(minVal)}%`
@@ -303,7 +304,7 @@ export const SearchDrawer: React.FC<SearchDrawerProps> = ({ isOpen, onClose, onA
                  />
              </div>
              
-             <div className="flex justify-between text-[10px] text-gray-400 font-mono -mt-2">
+             <div className="flex justify-between text-[10px] text-gray-200 font-mono -mt-2 opacity-80">
                 <span>¥0</span>
                 <span>¥5000</span>
                 <span>¥10000+</span>
@@ -313,16 +314,16 @@ export const SearchDrawer: React.FC<SearchDrawerProps> = ({ isOpen, onClose, onA
         </div>
 
         {/* Footer Buttons */}
-        <div className="p-6 border-t border-white/10 bg-[#8B0000]/30 shrink-0 flex gap-4">
+        <div className="p-6 border-t border-white/10 bg-[#b01010] shrink-0 flex gap-4">
             <button 
                 onClick={handleReset}
-                className="flex-1 py-3 rounded-lg border border-white/20 text-white font-serif hover:bg-white/10 transition-colors flex items-center justify-center gap-2 text-sm"
+                className="flex-1 py-3 rounded-lg border border-white/30 text-white font-serif hover:bg-white/10 transition-colors flex items-center justify-center gap-2 text-sm"
             >
                 <RotateCcw size={16} /> Reset
             </button>
             <button 
                 onClick={handleApply}
-                className="flex-[2] py-3 rounded-lg bg-gold-coin text-[#8B0000] font-bold font-serif shadow-lg hover:bg-[#ffe033] hover:scale-[1.02] transition-all text-sm uppercase tracking-wide"
+                className="flex-[2] py-3 rounded-lg bg-gold-coin text-[#8B0000] font-bold font-serif shadow-lg hover:bg-[#ffe033] hover:scale-[1.02] transition-all text-sm uppercase tracking-wide border border-yellow-300/50"
             >
                 Search & Apply
             </button>

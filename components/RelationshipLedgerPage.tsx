@@ -92,7 +92,7 @@ export const RelationshipLedgerPage: React.FC<RelationshipLedgerPageProps> = ({ 
                         onClick={() => onViewDetails(selectedPerson)}
                         className="bg-[#8B0000] text-gold-coin font-bold font-serif px-8 py-3 rounded shadow-lg hover:bg-[#a61e1e] hover:scale-105 transition-all flex items-center gap-2 uppercase tracking-widest text-sm"
                      >
-                        View Full Profile (查看更多) <ExternalLink size={16} />
+                        View Full Profile <ExternalLink size={16} />
                      </button>
                   </div>
               </div>

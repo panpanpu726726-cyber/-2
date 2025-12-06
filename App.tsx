@@ -6,9 +6,11 @@ import { AddEventModal } from './components/AddEventModal';
 import { Navigation } from './components/Navigation';
 import { EmotionalOverview } from './components/EmotionalOverview';
 import { SearchDrawer } from './components/SearchDrawer';
+import { SettingsDrawer } from './components/SettingsDrawer';
 import { RelationshipLedgerPage } from './components/RelationshipLedgerPage';
 import { EmotionalFluctuationsPage } from './components/EmotionalFluctuationsPage';
 import { RelationshipDetailPage } from './components/RelationshipDetailPage';
+import { CreateEventDetailPage } from './components/CreateEventDetailPage';
 import { MOCK_EVENTS } from './constants';
 import { GiftEvent, FilterState, Page } from './types';
 import { getCategory } from './utils';
@@ -19,6 +21,9 @@ function App() {
   
   // Detail Page State
   const [selectedPersonForDetail, setSelectedPersonForDetail] = useState<string | null>(null);
+
+  // Create Event Detail State
+  const [draftEvent, setDraftEvent] = useState<Partial<GiftEvent> | undefined>(undefined);
   
   // Home Page State
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
@@ -26,6 +31,7 @@ function App() {
   const [isOverviewOpen, setIsOverviewOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSearchDrawerOpen, setIsSearchDrawerOpen] = useState(false);
+  const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   
   // Search State
   const [filters, setFilters] = useState<FilterState>({
@@ -70,7 +76,24 @@ function App() {
     setEvents(prev => [newEvent, ...prev]);
   };
 
+  const handleSwitchToCreateDetail = (partialData: Partial<GiftEvent>) => {
+    setDraftEvent(partialData);
+    setIsAddModalOpen(false); // Close modal
+    setCurrentPage(Page.CREATE_EVENT_DETAIL);
+  };
+
+  const handleSaveFromPage = (newEvent: GiftEvent) => {
+    handleAddEvent(newEvent);
+    setCurrentPage(Page.HOME);
+    setDraftEvent(undefined);
+  };
+
   const handleNavigate = (page: Page) => {
+    if (page === Page.SETTINGS) {
+      setIsSettingsDrawerOpen(true);
+      setIsNavOpen(false);
+      return;
+    }
     setCurrentPage(page);
     setIsNavOpen(false);
   };
@@ -93,18 +116,32 @@ function App() {
     );
   }
 
-  // 2. Relationship Detail Page
+  // 2. Relationship Detail Page (View)
   if (currentPage === Page.RELATIONSHIP_DETAIL && selectedPersonForDetail) {
     return (
         <RelationshipDetailPage 
            person={selectedPersonForDetail}
            events={events.filter(e => e.person === selectedPersonForDetail)}
-           onBack={() => setCurrentPage(Page.RELATIONSHIP_LEDGER)}
+           onBack={() => setCurrentPage(Page.HOME)} 
         />
     );
   }
 
-  // 3. Emotional Fluctuations Page
+  // 3. Create Event Detail Page (Add)
+  if (currentPage === Page.CREATE_EVENT_DETAIL) {
+    return (
+        <CreateEventDetailPage 
+            initialData={draftEvent}
+            onBack={() => {
+                setDraftEvent(undefined);
+                setCurrentPage(Page.HOME);
+            }}
+            onSave={handleSaveFromPage}
+        />
+    );
+  }
+
+  // 4. Emotional Fluctuations Page
   if (currentPage === Page.EMOTIONAL_FLUCTUATIONS) {
     return (
         <EmotionalFluctuationsPage 
@@ -194,6 +231,7 @@ function App() {
                       angle={angle}
                       isHovered={hoveredEventId === event.id}
                       onHover={setHoveredEventId}
+                      onViewDetails={handleViewPersonDetails}
                     />
                   );
                 })
@@ -226,7 +264,17 @@ function App() {
         onApplyFilters={setFilters}
       />
 
-      <AddEventModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddEvent} />
+      <SettingsDrawer 
+        isOpen={isSettingsDrawerOpen}
+        onClose={() => setIsSettingsDrawerOpen(false)}
+      />
+
+      <AddEventModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onAdd={handleAddEvent}
+        onSwitchToDetail={handleSwitchToCreateDetail}
+      />
 
     </div>
   );

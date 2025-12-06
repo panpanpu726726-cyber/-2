@@ -1,16 +1,20 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { GiftEvent, TransactionType } from '../types';
-import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, ArrowRight } from 'lucide-react';
 
 interface RedEnvelopeProps {
   event: GiftEvent;
   isHovered: boolean;
   onHover: (id: string | null) => void;
   angle: number; // Position on circle in degrees (0-360)
+  onViewDetails: (person: string) => void;
 }
 
-export const RedEnvelope: React.FC<RedEnvelopeProps> = ({ event, isHovered, onHover, angle }) => {
+export const RedEnvelope: React.FC<RedEnvelopeProps> = ({ event, isHovered, onHover, angle, onViewDetails }) => {
   const isIncome = event.type === TransactionType.INCOME;
+  const plateRef = useRef<HTMLDivElement>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number; side: 'left' | 'right' } | null>(null);
   
   // Radius calculations
   // Table size is 480px diameter -> 240px radius
@@ -21,13 +25,21 @@ export const RedEnvelope: React.FC<RedEnvelopeProps> = ({ event, isHovered, onHo
   // Plate (w-24/96px): Center at 132.
   const plateRadius = 132;
 
-  // Logic to detect side of table for tooltip positioning
-  
-  // Right Side (approx 3 o'clock, angle 0). Range: 330 to 360 OR 0 to 30.
-  const isRightSide = angle < 30 || angle > 330;
+  // Split table into Left and Right halves based on vertical centerline (90deg - 270deg)
+  // Left Half: 90 -> 270.
+  const isLeftHalf = angle >= 90 && angle <= 270;
 
-  // Left Side (approx 9 o'clock to 11 o'clock). Range includes 180 (Odd Classmate) and 240 (Colleague Jen).
-  const isLeftSide = angle > 150 && angle < 260;
+  // // FIXED ISSUE 2: Calculate position based on the actual DOM element's bounding box
+  useEffect(() => {
+    if (isHovered && plateRef.current) {
+      const rect = plateRef.current.getBoundingClientRect();
+      setTooltipPos({
+        x: isLeftHalf ? rect.left : rect.right,
+        y: rect.top + rect.height / 2,
+        side: isLeftHalf ? 'left' : 'right'
+      });
+    }
+  }, [isHovered, isLeftHalf]);
 
   // Deterministically select food type based on ID
   const getFoodContent = (id: string) => {
@@ -73,30 +85,9 @@ export const RedEnvelope: React.FC<RedEnvelopeProps> = ({ event, isHovered, onHo
     }
   }
 
-  // Determine transform style for tooltip based on position
-  const getTooltipTransform = () => {
-    let baseTransform = `translate(${plateRadius}px, 0) rotate(-${angle}deg)`;
-    
-    if (isLeftSide) {
-      // Move further left (-165px) to clear the envelope (fixes Colleague Jen overlap)
-      // Vertical shift (-25%) to center-align roughly with envelope
-      return `${baseTransform} translateX(-165px) translateY(-25%)`;
-    } 
-    
-    if (isRightSide) {
-      // Move to the right (155px) to sit next to envelope (fixes Cousin Li)
-      // Vertical shift (-25%)
-      return `${baseTransform} translateX(155px) translateY(-25%)`;
-    }
-
-    // Default (Top)
-    return baseTransform;
-  };
-
   return (
     <div 
-      // Dynamic Z-index ensures the hovered item is always on top of others
-      className={`absolute top-1/2 left-1/2 w-0 h-0 transition-all ${isHovered ? 'z-50' : 'z-20'}`}
+      className={`absolute top-1/2 left-1/2 w-0 h-0 transition-all z-20`}
       style={{
         transform: `rotate(${angle}deg)`,
       }}
@@ -131,7 +122,7 @@ export const RedEnvelope: React.FC<RedEnvelopeProps> = ({ event, isHovered, onHo
             }}
         >
             {/* Wrapper to center the 96x96 place setting on the radius point */}
-            <div className="relative w-24 h-24 -ml-12 -mt-12">
+            <div className="relative w-24 h-24 -ml-12 -mt-12" ref={plateRef}>
             
               {/* Plate (Center of this component) - w-24 h-24 */}
               <div className="relative w-24 h-24 rounded-full bg-[#f0f0f0] shadow-md flex items-center justify-center border border-gray-200 z-10">
@@ -170,50 +161,56 @@ export const RedEnvelope: React.FC<RedEnvelopeProps> = ({ event, isHovered, onHo
         </div>
 
         {/* 
-          Floating Tooltip 
+          Floating Tooltip via Portal
+          // FIXED ISSUE 1: Render via Portal to ensure top-layer z-index
         */}
-        <div 
-          className={`absolute z-50 pointer-events-none transition-all duration-300 ease-out origin-center
-              ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}
-          `}
-          style={{ 
-             // Origin is at the center of the plate (radius position)
-             transform: getTooltipTransform(), 
-             width: '200px',
-             left: '50%',
-             marginLeft: '-100px', // Center horizontally on anchor point
-             
-             // Vertical Positioning Anchors
-             // If Left or Right side, we use 'top: 0' to align via translateY (-25%).
-             // If Top/Bottom (Default), we use 'bottom: 58px' to sit on top of plate.
-             bottom: (isLeftSide || isRightSide) ? 'auto' : '58px', 
-             top: (isLeftSide || isRightSide) ? '0' : 'auto',
-          }} 
-        >
-            <div className={`bg-white/50 backdrop-blur-md p-3 rounded-xl shadow-2xl border-l-4 relative
-              ${isIncome ? 'border-green-600' : 'border-red-600'}
-            `}>
-              <div className="flex justify-between items-center text-[10px] text-gray-800 uppercase font-bold tracking-widest mb-1">
-                <span>{event.date}</span>
-                {isIncome ? <ArrowDownCircle size={14} className="text-green-700"/> : <ArrowUpCircle size={14} className="text-red-700"/>}
-              </div>
-              
-              <div className="flex justify-between items-start mb-1">
-                 <div className="font-serif font-bold text-gray-900 text-base leading-tight">{event.person}</div>
-                 <div className={`text-base font-bold ${isIncome ? 'text-green-800' : 'text-red-800'}`}>
-                   ¥{event.amount.toLocaleString()}
-                 </div>
-              </div>
-              
-              <div className="text-xs text-gray-800 mb-2 font-medium bg-white/60 inline-block px-2 py-0.5 rounded-full">{event.occasion}</div>
-              
-              {event.aiAnalysis && (
-                <div className="mt-2 text-xs leading-relaxed text-gray-900 italic border-t border-gray-400/30 pt-2 font-serif font-medium">
-                  "{event.aiAnalysis}"
+        {isHovered && tooltipPos && createPortal(
+          <div 
+            className="fixed pointer-events-auto transition-all duration-300 ease-out z-[9999]"
+            style={{ 
+               top: tooltipPos.y,
+               left: tooltipPos.x,
+               // FIXED ISSUE 2: Dynamic anchor transform based on calculated side
+               transform: `translate(${tooltipPos.side === 'left' ? '-100%' : '0'}, -50%) translateX(${tooltipPos.side === 'left' ? '-10px' : '10px'})`,
+               width: '200px'
+            }} 
+            onMouseEnter={() => onHover(event.id)}
+            onMouseLeave={() => onHover(null)}
+          >
+              <div className={`bg-white/50 backdrop-blur-md p-3 rounded-xl shadow-2xl relative cursor-default`}>
+                <div className="flex justify-between items-center text-[10px] text-gray-800 uppercase font-bold tracking-widest mb-1">
+                  <span>{event.date}</span>
+                  {isIncome ? <ArrowDownCircle size={14} className="text-green-700"/> : <ArrowUpCircle size={14} className="text-red-700"/>}
                 </div>
-              )}
-            </div>
-        </div>
+                
+                <div className="flex justify-between items-start mb-1">
+                   <div className="font-serif font-bold text-gray-900 text-base leading-tight">{event.person}</div>
+                   <div className={`text-base font-bold ${isIncome ? 'text-green-800' : 'text-red-800'}`}>
+                     ¥{event.amount.toLocaleString()}
+                   </div>
+                </div>
+                
+                <div className="text-xs text-gray-800 mb-2 font-medium bg-white/60 inline-block px-2 py-0.5 rounded-full">{event.occasion}</div>
+                
+                {event.aiAnalysis && (
+                  <div className="mt-2 text-xs leading-relaxed text-gray-900 italic border-t border-gray-400/30 pt-2 font-serif font-medium">
+                    "{event.aiAnalysis}"
+                  </div>
+                )}
+
+                 <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewDetails(event.person);
+                    }}
+                    className="mt-3 w-full py-2 bg-[#8B0000] text-gold-coin text-[10px] font-bold uppercase tracking-widest rounded hover:bg-[#a52a2a] transition-colors flex items-center justify-center gap-1 border border-gold-coin/20 shadow-md group"
+                  >
+                    Read More <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                 </button>
+              </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
