@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
-import { Menu, Plus, Search } from 'lucide-react';
+import React, { useState, useMemo, useRef } from 'react';
+import { Menu, Plus, Search, ChevronUp } from 'lucide-react';
 import { RedEnvelope } from './components/RedEnvelope';
 import { AddEventModal } from './components/AddEventModal';
 import { Navigation } from './components/Navigation';
@@ -33,6 +33,9 @@ function App() {
   const [isSearchDrawerOpen, setIsSearchDrawerOpen] = useState(false);
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   
+  // Gesture State
+  const touchStartY = useRef<number | null>(null);
+
   // Search State
   const [filters, setFilters] = useState<FilterState>({
     query: '',
@@ -104,6 +107,34 @@ function App() {
     setCurrentPage(Page.RELATIONSHIP_DETAIL);
   };
 
+  // --- Gesture Handlers for Home Page ---
+  const isAnyModalOpen = isNavOpen || isOverviewOpen || isAddModalOpen || isSearchDrawerOpen || isSettingsDrawerOpen;
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (currentPage !== Page.HOME || isAnyModalOpen) return;
+    // Scroll Down / Swipe Up on trackpad
+    if (e.deltaY > 50) {
+        handleNavigate(Page.RELATIONSHIP_LEDGER);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (currentPage !== Page.HOME || isAnyModalOpen) return;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (currentPage !== Page.HOME || isAnyModalOpen || touchStartY.current === null) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY.current - touchEndY;
+    
+    // If swipe up distance > 50px
+    if (diff > 50) {
+        handleNavigate(Page.RELATIONSHIP_LEDGER);
+    }
+    touchStartY.current = null;
+  };
+
   // --- Router Logic ---
   
   // 1. Relationship Ledger Page
@@ -154,7 +185,12 @@ function App() {
 
   // Fallback / Default: Render Home Page (Dining Table)
   return (
-    <div className="relative w-screen h-screen bg-[#B11414] overflow-hidden font-serif">
+    <div 
+        className="relative w-screen h-screen bg-[#B11414] overflow-hidden font-serif"
+        onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+    >
       
       {/* --- Top Navigation Bar --- */}
       <div className="absolute top-0 left-0 w-full h-24 px-6 flex justify-between items-center z-40 bg-[#951111]">
@@ -241,6 +277,15 @@ function App() {
 
            {/* Shadow under table */}
            <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[460px] h-[460px] rounded-full bg-black/20 blur-2xl -z-10"></div>
+        </div>
+
+        {/* --- Bottom Gesture Hint --- */}
+        <div 
+            className="absolute bottom-8 left-8 flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer z-20" 
+            onClick={() => handleNavigate(Page.RELATIONSHIP_LEDGER)}
+        >
+            <div className="text-[10px] text-gold-coin uppercase tracking-widest font-bold drop-shadow-md">Swipe Up for Ledger</div>
+            <ChevronUp className="text-white drop-shadow-md" size={24} strokeWidth={2.5} />
         </div>
 
       </div>
