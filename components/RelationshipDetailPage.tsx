@@ -8,9 +8,10 @@ interface RelationshipDetailPageProps {
   person: string;
   events: GiftEvent[];
   onBack: () => void;
+  isCreateMode?: boolean;
 }
 
-export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ person, events, onBack }) => {
+export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ person, events, onBack, isCreateMode = false }) => {
   const [activeTab, setActiveTab] = useState<'GIVING' | 'RECEIVING'>('GIVING');
 
   // --- 1. Augmented Data Logic ---
@@ -165,21 +166,34 @@ export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ 
     return true;
   });
 
-  // Mock Realistic Images
+  // Mock Realistic Images - using Chinese/Asian portraits matching the user reference style
   const getProfileImage = () => {
-    if (category === 'Elders') return "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop"; 
-    if (category === 'Core Family') return "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop"; 
-    if (category === 'Workplace') return "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop"; 
-    return "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop"; 
+    // 1. Auntie Zhang / Elders (Female) - Asian, middle-aged/elderly woman, half body portrait
+    if (person.includes('Zhang') || person.includes('Aunt') || (category === 'Elders' && !person.includes('Uncle'))) {
+        return "https://images.unsplash.com/photo-1581579434740-11a77fe6a79f?q=80&w=600&auto=format&fit=crop"; 
+    }
+    
+    // 2. Uncle / Boss / Father (Male) - Asian, elderly/middle-aged man, half body
+    if (person.includes('Li') || person.includes('Wang') || person.includes('Boss') || person.includes('Dad') || person.includes('Uncle') || category === 'Core Family') {
+        return "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop"; 
+    }
+    
+    // 3. Young Female (Colleague/Friend/Jen) - Asian professional woman
+    if (person.includes('Jen') || person.includes('Sister') || category === 'Workplace') {
+        return "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop";
+    }
+    
+    // 4. Close Friends / General - Young Asian Male/Female
+    return "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?q=80&w=600&auto=format&fit=crop"; 
   };
 
   const getEventImage = (index: number) => {
     const images = [
-      "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=600&auto=format&fit=crop", 
-      "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600&auto=format&fit=crop", 
-      "https://images.unsplash.com/photo-1529516548873-9ce57c8f155e?q=80&w=600&auto=format&fit=crop", 
-      "https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1512909006721-3d6018887383?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=600&auto=format&fit=crop", // Chinese Wedding
+      "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600&auto=format&fit=crop", // Red Envelopes
+      "https://images.unsplash.com/photo-1529516548873-9ce57c8f155e?q=80&w=600&auto=format&fit=crop", // Tea
+      "https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=600&auto=format&fit=crop", // Celebration
+      "https://images.unsplash.com/photo-1512909006721-3d6018887383?q=80&w=600&auto=format&fit=crop"  // Holiday
     ];
     return images[index % images.length];
   };
@@ -187,7 +201,7 @@ export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ 
   // Helper Component for "Form Field" style card
   // Using <fieldset> and <legend> to cut the border line with the label
   const Field = ({ label, value, isMoney = false }: { label: string, value: React.ReactNode, isMoney?: boolean }) => (
-    <fieldset className="border-[2px] border-white/80 rounded-lg px-4 pb-3 pt-1 bg-transparent hover:bg-white/5 transition-colors group w-full">
+    <fieldset className="border-[2px] border-white/80 rounded-lg px-4 pb-3 pt-1 bg-transparent hover:bg-white/5 transition-colors group w-full relative">
        <legend className="text-xs text-white px-2 font-bold tracking-wider ml-1">
           {label}
        </legend>

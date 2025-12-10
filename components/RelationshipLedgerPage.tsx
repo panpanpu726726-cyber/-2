@@ -43,8 +43,13 @@ export const RelationshipLedgerPage: React.FC<RelationshipLedgerPageProps> = ({ 
       </div>
 
       {/* Main Content: The Archive Scene */}
-      <div className="flex-1 flex items-center justify-center relative perspective-1000">
+      <div className="flex-1 flex items-center justify-center relative perspective-1000 overflow-hidden">
         
+        {/* Background Decorative Watermark */}
+        <div className="absolute top-[15%] left-1/2 -translate-x-1/2 text-[10vw] font-bold text-black/5 pointer-events-none select-none whitespace-nowrap z-0 font-serif leading-none">
+            SOCIAL ARCHIVES
+        </div>
+
         {/* Detail Overlay (When a file is pulled) */}
         {selectedPerson && (
            <div className="absolute inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-8" onClick={() => setSelectedPerson(null)}>
@@ -102,7 +107,7 @@ export const RelationshipLedgerPage: React.FC<RelationshipLedgerPageProps> = ({ 
         )}
 
         {/* The Archive Drawer */}
-        <div className="relative w-[600px] h-[300px] mt-40">
+        <div className="relative w-[600px] h-[300px] transform scale-125 translate-y-12">
            
            {/* Back of Drawer */}
            <div className="absolute bottom-0 left-4 w-[570px] h-[200px] bg-[#3e2723] rounded-t-lg z-0 transform translate-z-[-20px] shadow-inner"></div>
